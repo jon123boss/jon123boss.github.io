@@ -1,0 +1,166 @@
+/* Shared finishing layer. Keep authored content and the three-link navigation quiet. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 28px; }
+body { min-width: 0; }
+[hidden] { display: none !important; }
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+img, svg { max-width: 100%; }
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent, #cb8883); outline-offset: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip-link { z-index: 100; border-radius: 3px; }
+.site-shell { width: min(940px, calc(100% - 64px)); }
+.site-header { align-items: center; }
+.site-header nav { flex-shrink: 0; }
+nav a { display: inline-flex; align-items: center; min-height: 44px; }
+.wordmark { min-height: 44px; align-items: center; line-height: 1.25; }
+.wordmark-name { display: block; }
+.page { min-width: 0; }
+.about-page .bio-greeting { margin: 0 0 14px; font: 600 1em/1.65 var(--font); color: inherit; }
+.notebook-title { font: 400 12px/1.85 var(--font); letter-spacing: .04em; margin-bottom: 10px; }
+.notebook-entry h2 { font-size: clamp(17px, 2.2vw, 21px); line-height: 1.6; max-width: 660px; margin-inline: auto; }
+.notebook-entry p { max-width: 620px; margin-inline: auto; }
+.notebook-meta { flex-wrap: wrap; }
+.notebook-article > h1 { max-width: 740px; }
+.notebook-article .article-body { line-height: 1.9; }
+.article-body h2[id] { scroll-margin-top: 28px; }
+.article-body h2[id]:focus { outline: none; }
+.article-body p, .paper-info, .architecture-specs dd, .leader-name { overflow-wrap: anywhere; }
+.article-contents { max-width: 740px; margin: 0 auto 38px; padding: 12px 0; border-top: 1px solid #a59b9e40; border-bottom: 1px solid #a59b9e40; }
+.article-contents summary { display: block; min-height: 28px; color: #c6bec0; font-size: 13px; line-height: 28px; }
+.article-contents ol { margin: 16px 0 8px; padding-left: 26px; font-size: 13px; line-height: 1.7; }
+.article-contents li { padding: 4px 0 4px 4px; }
+.article-contents a { text-decoration: underline; text-decoration-color: #a59b9e40; }
+.explanation-page { margin-inline: auto; }
+.reading-peek { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+.background-controls { gap: 8px; }
+.background-controls button { min-height: 44px; padding: 9px 12px; background: #231f20f5; }
+.ambient-canvas[data-renderer='static'], .ambient-canvas[data-renderer='context-lost'] { background: radial-gradient(ellipse at 80% 0%, #53353a30, transparent 60%), repeating-linear-gradient(91deg, transparent 0 9px, #91343d0c 10px 11px, transparent 12px 19px); }
+.ambient-canvas[data-motion='paused'] { animation-play-state: paused; }
+.research-plot, .research-diagram { min-width: 0; }
+.research-plot:has(> .chart-fallback) { min-height: 340px; }
+.plot-tabs button, .plot-legend button, .plot-range, .budget-preset button { min-height: 36px; }
+.diagram-focus button { min-width: 36px; height: 36px; }
+.plot-legend button[aria-pressed='false'] { opacity: 1; color: #a59b9e; }
+.plot-legend button[aria-pressed='false'] .plot-swatch { opacity: .45; }
+.plot-stage:focus-visible { outline: 2px solid #d89b86; }
+.plot-tooltip { overflow-wrap: anywhere; }
+.chart-fallback { color: #c6bec0; font-size: 12px; }
+.chart-fallback h3 { color: #eee5e1; font: 500 15px/1.6 var(--font); margin: 0 0 10px; }
+.chart-fallback p { font-size: 11px; }
+.chart-fallback table { width: 100%; border-collapse: collapse; text-align: left; }
+.chart-fallback th, .chart-fallback td { padding: 8px 8px 8px 0; border-bottom: 1px solid #a59b9e30; overflow-wrap: anywhere; }
+.chart-fallback th { font-weight: 500; }
+.chart-fallback caption { text-align: left; margin: 0 0 12px; color: var(--muted); }
+@media (max-width: 620px) {
+  .site-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
+  .site-header { padding-top: max(20px, env(safe-area-inset-top)); row-gap: 10px; }
+  nav { gap: 22px; }
+  .notebook-article > h1 { font-size: clamp(23px, 5.8vw, 30px); letter-spacing: -.035em; }
+  .notebook-article .article-body { font-size: 15px; line-height: 1.85; }
+  .article-body h2 { font-size: 20px; }
+  .article-meta { font-size: 12px; line-height: 1.7; }
+  .research-plot, .research-diagram { margin-inline: -6px; }
+  .plot-tabs button, .plot-legend button { font-size: 11px; }
+  .plot-meta, .article-body .plot-meta { font-size: 11px; }
+  .architecture-specs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .budget-numbers { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .paper-entry { padding: 20px 16px; }
+  .paper-links { gap: 8px 24px; }
+  .paper-link, .explanation-button { min-height: 44px; display: inline-flex; align-items: center; }
+  .paper-explanation { text-align: left; }
+  .paper-explanation .explanation-button { margin-left: 0; }
+  .reading-article main { margin-top: 34px; }
+  .reading-article .back-link { margin-bottom: 24px; }
+  .article-contents { margin-bottom: 32px; }
+  .article-contents summary { min-height: 36px; line-height: 36px; }
+  .article-contents a { display: block; padding-block: 5px; }
+}
+@media (pointer: coarse) {
+  .quiet-button, .plot-tabs button, .plot-legend button, .plot-range, .budget-preset button, .lab-step, .trace-concept, .peek-close { min-height: 44px; }
+  .diagram-focus button { min-width: 44px; height: 44px; }
+  .budget-slider input, .lab-control input { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (prefers-contrast: more) {
+  :root { --muted: #c6bec0; }
+  .article-body p, .article-body > ul { color: #e7e1df; }
+  .ambient-canvas { opacity: 0; }
+  .research-plot, .research-diagram, .paper-entry { border-color: #a59b9e; }
+}
+@media (forced-colors: active) {
+  .ambient-canvas, .about-page::before { display: none; }
+  .page { text-shadow: none; }
+  .plot-line { stroke: CanvasText; }
+  .plot-tick { fill: CanvasText; }
+  .plot-grid, .plot-baseline, .plot-hairline { stroke: GrayText; }
+  .plot-swatch, .leader-track span, .budget-bar span { background: Highlight; }
+  .plot-line, .plot-bar { forced-color-adjust: none; }
+  button[aria-selected='true'], button[aria-pressed='true'], .leader-local { outline: 1px solid Highlight; }
+}
+@media print {
+  :root { color-scheme: light; --bg: #fff; --text: #161616; --muted: #444; }
+  body { color: #161616; background: #fff; padding: 0; font-size: 10pt; }
+  .ambient-canvas, .background-controls, .skip-link, .site-header nav, .article-contents, .back-link, .reading-peek { display: none !important; }
+  .site-shell { width: 100%; margin: 0; }
+  .site-header { padding: 0 0 20px; color: #161616; }
+  .wordmark-logo { display: none; }
+  main, .reading-article main { margin: 0; padding: 0; }
+  .page { max-width: none; text-shadow: none; }
+  .about-page::before { display: none; }
+  .article-body p, .article-body > ul, .article-body strong, .about-page .bio { color: #161616; }
+  .research-plot, .research-diagram, .paper-entry { background: #fff; color: #161616; border-color: #bbb; box-shadow: none; }
+  .chart-fallback h3, .plot-header h3, .leader-header h3, .architecture-specs dd, .leader-name, .leader-score, .budget-numbers strong, .chart-fallback { color: #161616; }
+  .plot-meta, .plot-y-title, .plot-x-title, .architecture-specs dt { color: #444 !important; }
+  .plot-tick { fill: #333; }
+  .plot-grid, .plot-baseline { stroke: #ccc; }
+  .plot-tooltip, .plot-tabs, .budget-preset { display: none !important; }
+  .plot-legend button { display: inline-flex; color: #222; }
+  .plot-legend button[aria-pressed='false'] { display: none; }
+  .plot-swatch, .leader-track, .budget-bar { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  h1, h2, h3 { break-after: avoid; }
+  p { orphans: 3; widows: 3; }
+  .article-body pre { white-space: pre-wrap; overflow-wrap: anywhere; color: #161616; background: #f6f6f6; }
+}
+
+/* Outlined notebook entries with one clear destination per card. */
+.notebook-page .entry-list { display: grid; gap: 18px; max-width: 840px; margin-inline: auto; }
+.notebook-entry { margin: 0; padding: 0; border: 0; }
+.notebook-entry > a {
+  position: relative; padding: 28px 50px 30px; border: 1px solid #a59b9e55;
+  border-radius: 6px; background: #231f20a8; text-decoration: none;
+  transition: border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+}
+.notebook-entry .notebook-meta { margin-bottom: 13px; }
+.notebook-entry h2 { margin-block: 0; font-weight: 400; }
+.notebook-open { position: absolute; top: 24px; right: 23px; font-size: 16px; line-height: 1; color: #a59b9e; transition: color 220ms ease, transform 220ms ease; }
+.notebook-entry > a:focus-visible { border-color: var(--accent); outline-offset: 5px; }
+@media (hover: hover) {
+  .notebook-entry > a:hover { border-color: #cb88839c; background-color: #2c2427de; box-shadow: 0 8px 30px #120f1018; }
+  .notebook-entry > a:hover .notebook-open { color: var(--accent); transform: translateX(3px); }
+}
+@media (max-width: 620px) {
+  .notebook-entry > a { padding: 23px 24px 26px; }
+  .notebook-entry .notebook-meta { padding-inline: 14px; font-size: 10px; gap: 12px; }
+  .notebook-entry h2 { font-size: 18px; line-height: 1.55; }
+  .notebook-open { top: 24px; right: 14px; font-size: 14px; }
+}
+
+/* A small, staggered entrance inspired by the reference's fade-up treatment. */
+main.page-arrival > .page > * {
+  animation: content-arrival 420ms cubic-bezier(.22, 1, .36, 1) var(--arrival-delay, 0ms) backwards;
+}
+main.page-arrival > .article-rail { animation: content-opacity 420ms ease 100ms backwards; }
+@keyframes content-arrival { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes content-opacity { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the appearance cue, with no movement or stagger. */
+  main.page-arrival > .page > *, main.page-arrival > .article-rail { animation: content-opacity 180ms linear backwards !important; }
+}
+@media (forced-colors: active) { .notebook-entry > a { border-color: CanvasText; } }
+@media print {
+  .notebook-entry > a { background: #fff; border-color: #bbb; }
+  .notebook-open { display: none; }
+  main.page-arrival > .page > *, main.page-arrival > .article-rail { animation: none !important; }
+}

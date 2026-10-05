@@ -1,0 +1,71 @@
+{
+  "title": "Under 3M: score comparison",
+  "snapshot": "5 October 2026",
+  "source": "https://huggingface.co/spaces/AxiomicLabs/Open_SLM_Leaderboard",
+  "sourceRevision": "47375af50de97ef91d61b3edf31d2b5fbc12dde5",
+  "totalPublishedEntries": 32,
+  "localPosition": 3,
+  "rows": [
+    {
+      "name": "Tokle-3M",
+      "parameters": 2908947,
+      "arc": 34.85,
+      "arcChall": 23.98,
+      "hellaswag": 27.2,
+      "piqa": 55.01,
+      "arithmark3": 40.8,
+      "url": "https://huggingface.co/techdotus/Tokle-3M",
+      "score": 8.91324200913242
+    },
+    {
+      "name": "pulvis-v2",
+      "parameters": 2963840,
+      "arc": 31.86,
+      "arcChall": 22.78,
+      "hellaswag": 27.93,
+      "piqa": 56.86,
+      "arithmark3": 37.4,
+      "url": "https://huggingface.co/bench-labs/pulvis-v2",
+      "score": 8.621004566210045
+    },
+    {
+      "name": "Purrence",
+      "parameters": 2987712,
+      "score": 8.487306383044526,
+      "local": true
+    },
+    {
+      "name": "pulvis-v1",
+      "parameters": 2962240,
+      "arc": 31.61,
+      "arcChall": 22.27,
+      "hellaswag": 27.91,
+      "piqa": 55.93,
+      "arithmark3": 36.9,
+      "url": "https://huggingface.co/bench-labs/pulvis-v1",
+      "score": 7.846575342465751
+    },
+    {
+      "name": "Ember-2",
+      "parameters": 2963360,
+      "arc": 33.42,
+      "arcChall": 22.01,
+      "hellaswag": 27.28,
+      "piqa": 55.11,
+      "arithmark3": 35.9,
+      "url": "https://huggingface.co/SurjoLabs/Ember-2",
+      "score": 7.2127853881278545
+    },
+    {
+      "name": "ZeroS-Micro-v1.0",
+      "parameters": 2869813,
+      "arc": 31.27,
+      "arcChall": 22.01,
+      "hellaswag": 28.46,
+      "piqa": 53.86,
+      "arithmark3": 35.6,
+      "url": "https://huggingface.co/fromziro/ZeroS-Micro-v1.0",
+      "score": 6.494977168949772
+    }
+  ]
+}

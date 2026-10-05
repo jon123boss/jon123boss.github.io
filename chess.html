@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#231f20">
+  <meta name="description" content="Jonathan Su. Language model architecture, residuals and pretraining.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Chess — Jonathan Su">
+  <meta property="og:description" content="Jonathan Su. Language model architecture, residuals and pretraining.">
+  <link rel="preload" href="assets/jetbrains-mono.ttf" as="font" type="font/ttf" crossorigin>
+  <title>Chess — Jonathan Su</title>
+  <link rel="icon" type="image/svg+xml" href="assets/recursive-j-logo.svg">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="styles.css?v=feedback-round3-20261005">
+  <link rel="stylesheet" href="features.css?v=reading-20261005">
+  <link rel="stylesheet" href="refinements.css?v=blog-cards-20261005">
+  <link rel="stylesheet" href="theme.css?v=logo-38">
+  <link rel="stylesheet" href="research-plots.css?platform-polish-20261005">
+  <link rel="stylesheet" href="polish.css?v=blog-cards-20261005">
+  <link rel="stylesheet" href="article-navigation.css?v=blog-cards-panel-20261005">
+  <script type="module" src="app.js?v=blog-cards-20261005b"></script>
+  <script type="module" src="theme-controller.js?v=blackwall-rail-20261005c"></script>
+</head>
+<body class="view-about" data-route="about/chess">
+  <canvas class="ambient-canvas" id="ambient" aria-hidden="true"></canvas>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="site-shell" id="site-content">
+    <header class="site-header">
+      <a class="wordmark" href="index.html" data-route="about" aria-label="Jonathan Su, home"    aria-current="page"><img class="wordmark-logo" src="assets/recursive-j-logo.svg" width="32" height="32" alt="" aria-hidden="true"><span class="wordmark-name">Jonathan Su</span></a>
+      <nav aria-label="Main navigation">
+        <a href="index.html" data-route="about"     aria-current="page">About Me</a>
+        <a href="blogs.html" data-route="blogs">Blogs</a>
+        <a href="papers.html" data-route="papers">Papers</a>
+      </nav>
+    </header>
+    <main id="main" tabindex="-1"><section class="page chess-page" aria-label="Chess opening">
+    <a class="back-link" href="index.html" data-route="about" aria-current="page">← about me</a>
+    <p class="feature-kicker">a very opinionated opening quiz</p>
+    <h1>what is the best chess opening?</h1>
+    <p class="chess-instruction">white to move. pick a piece, then its destination.</p>
+    <noscript><p>The opening quiz needs JavaScript. You can still read the rest of the site.</p></noscript><div class="chess-board" role="group" aria-label="Chess board, White at the bottom"></div>
+    <div class="chess-feedback"><p class="chess-result" role="status" aria-live="polite">your move.</p><button class="quiet-button chess-reset" type="button">start again</button></div>
+  </section></main>
+  </div>
+  <div hidden class="background-controls" role="group" aria-label="Background controls">
+    <button class="content-toggle" type="button" aria-controls="site-content" aria-expanded="true" hidden>Hide Content</button>
+    <button class="rogue-toggle" type="button">Stop Rogue AIs</button>
+  </div>
+</body>
+</html>
