@@ -2,8 +2,8 @@ import { setupArticleNavigation } from './article-navigation.js?v=blog-cards-202
 import { about, papers } from './page-views.js?v=platform-polish-20261005';
 import { site } from './content.js?platform-polish-20261005';
 import { chessPage, setupChess } from './chess-opening.js?v=refined-24';
-import { notebookPage, notebookPost, visiblePosts } from './notebook.js?v=blog-cards-20261005';
-import { setupResearchPlots } from './research-plots.js?platform-polish-20261005';
+import { notebookPage, notebookPost, visiblePosts } from './notebook.js?v=blog-layout-20261009';
+import { setupResearchPlots } from './research-plots.js?v=blog-layout-20261009';
 import { clearReadingTools } from './reading-tools.js?v=features-20';
 import { setupPaperPreviews } from './paper-previews.js?v=blender-27';
 

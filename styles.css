@@ -87,6 +87,10 @@ body.view-empty-blogs main { margin: 0; flex: 1; display: grid; place-items: cen
 .notebook-article .article-body { max-width: none; }
 .notebook-article .article-body > :is(p, h2, details, pre, blockquote, ul, ol) { max-width: 740px; margin-inline: auto; }
 .article-body h2 { margin-top: 56px; font-size: 21px; line-height: 1.5; letter-spacing: -.025em; }
+.section-highlight { padding: .08em .45em .14em; border-radius: 3px; background: #ffe66430; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.article-body > h2:nth-of-type(4n+2) .section-highlight { background: #a898e940; }
+.article-body > h2:nth-of-type(4n+3) .section-highlight { background: #e8955038; }
+.article-body > h2:nth-of-type(4n+4) .section-highlight { background: #6b9eb840; }
 .article-body p { color: #c6bec0; }
 .article-body > ul { padding-left: 1.4em; color: #c6bec0; }
 .article-body > ul li { padding-left: .25em; margin-block: .6em; }

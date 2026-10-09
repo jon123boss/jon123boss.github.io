@@ -27,12 +27,13 @@ export function notebookPost(post) {
     return `<${tag}>${escape(block.text)}</${tag}>`;
   }).join('');
   const headings = [...(post.bodyHTML || '').matchAll(/<h2 id="([^"]+)">([^<]+)<\/h2>/g)];
+  const body = (post.bodyHTML || blocks).replace(/(<h2\b[^>]*>)([\s\S]*?)(<\/h2>)/g, '$1<span class="section-highlight">$2</span>$3');
   const contents = headings.length > 3 ? `<details class="article-contents"><summary>In this article <span class="article-progress-label" data-reading-progress hidden aria-label="Reading progress"></span></summary><ol>${headings.map(([,id,title]) => `<li><a href="#blogs/${encodeURIComponent(post.slug)}/${id}">${title}</a></li>`).join('')}</ol></details>` : '';
   return `${articleNavigation(headings, post.slug)}<article class="page notebook-article"><a class="back-link" href="#blogs">← Blogs</a>
     <p class="feature-kicker">${kindLabel(post)}</p><h1>${escape(post.title)}</h1>
     <p class="article-meta">${post.draft ? `draft · updated ${escape(post.updated || post.date)}` : `published ${escape(post.date)}${post.updated ? ` · updated ${escape(post.updated)}` : ''}`}</p>
     ${post.kind === 'idea' || post.kind === 'note' ? '<p class="notebook-stage-note">a thought in progress; this may change.</p>' : ''}
-    ${contents}<div class="article-body">${post.bodyHTML || blocks}</div>
+    ${contents}<div class="article-body">${body}</div>
     ${post.changes?.length ? `<details class="note-changes"><summary>how this note changed</summary><ul>${post.changes.map(change => `<li><time>${escape(change.date)}</time> — ${escape(change.text)}</li>`).join('')}</ul></details>` : ''}
   </article>`;
 }

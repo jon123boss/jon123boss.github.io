@@ -1,5 +1,5 @@
 import { escapeHTML as escape } from './site-utils.js';
-import { setupLeaderboard } from './leaderboard.js?v=attention-compute-plateau-20261005';
+import { setupLeaderboard } from './leaderboard.js?v=blog-layout-20261009';
 
 const COLORS = ['#9bb9ce', '#d89b86', '#9cc6ad', '#b6a2cf', '#d4bd88', '#b7bbbf'];
 const CACHE = new Map();
@@ -40,7 +40,7 @@ function chartData(id) {
 class ResearchPlot {
   constructor(host, chart) {
     this.host = host; this.chart = chart; this.index = 0; this.hidden = new Set();
-    this.uid = `research-plot-${++counter}`; this.fullRange = false; this.activeX = null;
+    this.uid = `research-plot-${++counter}`; this.fullRange = false; this.activeX = null; this.zoom = null; this.selection = null;
     this.events = new AbortController(); this.pendingResize = 0;
     this.renderShell();
     this.resize = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { cancelAnimationFrame(this.pendingResize); this.pendingResize = requestAnimationFrame(() => this.draw()); }) : null;
@@ -52,14 +52,15 @@ class ResearchPlot {
   renderShell() {
     const { chart, host } = this;
     host.classList.add('research-plot');
-    host.innerHTML = `<header class="plot-header"><div><h3 id="${this.uid}-title">${escape(chart.title)}</h3><p class="plot-meta">${escape(chart.meta)}</p></div></header>
+    host.innerHTML = `<header class="plot-header">
       ${chart.views.length > 1 ? `<div class="plot-tabs" role="tablist" aria-label="Views of ${escape(chart.title)}">${chart.views.map((v, i) => `<button type="button" role="tab" id="${this.uid}-tab-${i}" aria-controls="${this.uid}-panel" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-view="${i}">${escape(v.label)}</button>`).join('')}</div>` : ''}
+      <h3 id="${this.uid}-title">${escape(chart.title)}</h3></header>
       <div class="plot-panel" id="${this.uid}-panel" ${chart.views.length > 1 ? `role="tabpanel" aria-labelledby="${this.uid}-tab-0"` : ''}>
         <div class="plot-legend" aria-label="Visible series"></div>
-        <div class="plot-axis-header"><span class="plot-y-title"></span><button type="button" class="plot-range" data-action="range" hidden>Full range</button></div>
-        <div class="plot-stage" tabindex="0" role="group" aria-label="Interactive plot. Point or tap to inspect values. Use left and right arrow keys to move through points. Press Escape to clear."><svg class="plot-svg" role="img" aria-labelledby="${this.uid}-title"></svg><div class="plot-tooltip" hidden></div></div>
+        <div class="plot-axis-header"><span class="plot-y-title"></span><div class="plot-actions"><span class="plot-zoom-hint">Drag to zoom</span><button type="button" class="plot-range" data-action="reset-zoom" hidden>Reset zoom</button><button type="button" class="plot-range" data-action="range" hidden>Full range</button></div></div>
+        <div class="plot-stage" data-zoomable="true" tabindex="0" role="group" aria-label="Interactive plot. Drag a rectangle to zoom. Click the zoomed graph or press 0 to reset zoom. Point or tap to inspect values. Use left and right arrow keys to move through points. Press Escape to clear."><svg class="plot-svg" role="img" aria-labelledby="${this.uid}-title"></svg><div class="plot-tooltip" hidden></div></div>
         <div class="plot-x-title"></div><div class="plot-a11y" aria-live="polite" aria-atomic="true"></div>
-      </div>`;
+      </div><p class="plot-meta">${escape(chart.meta)}</p>`;
     this.svg = host.querySelector('svg'); this.stage = host.querySelector('.plot-stage'); this.tooltip = host.querySelector('.plot-tooltip');
     const options = { signal: this.events.signal };
     host.addEventListener('click', e => {
@@ -72,7 +73,8 @@ class ResearchPlot {
         this.renderLegend(); this.clear(); this.draw(); return;
       }
       const action = e.target.closest('[data-action]')?.dataset.action;
-      if (action === 'range') { this.fullRange = !this.fullRange; this.updateRange(); this.clear(); this.draw(); }
+      if (action === 'reset-zoom') this.resetZoom();
+      if (action === 'range') { this.zoom = null; this.fullRange = !this.fullRange; this.updateRange(); this.clear(); this.draw(); }
     }, options);
     host.querySelector('.plot-tabs')?.addEventListener('keydown', e => {
       if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
@@ -81,16 +83,24 @@ class ResearchPlot {
       const next = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (this.index + (e.key === 'ArrowRight' ? 1 : -1) + n) % n;
       this.setView(next); host.querySelector(`[data-view="${next}"]`).focus();
     }, options);
-    this.stage.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') this.inspectEvent(e); }, options);
-    this.stage.addEventListener('pointerdown', e => { this.inspectEvent(e); }, options);
-    this.stage.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch' && document.activeElement !== this.stage) this.clear(); }, options);
+    this.stage.addEventListener('pointermove', e => { if (this.selection) this.moveSelection(e); else if (e.pointerType !== 'touch') this.inspectEvent(e); }, options);
+    this.stage.addEventListener('pointerdown', e => { this.inspectEvent(e); this.startSelection(e); }, options);
+    this.stage.addEventListener('click', e => { if (e.pointerType === 'touch' && this.zoom) this.resetZoom(); }, options);
+    this.stage.addEventListener('pointerup', e => this.finishSelection(e), options);
+    this.stage.addEventListener('pointercancel', () => this.cancelSelection(), options);
+    this.stage.addEventListener('lostpointercapture', () => this.cancelSelection(), options);
+    this.stage.addEventListener('dblclick', () => this.resetZoom(), options);
+    this.stage.addEventListener('pointerleave', e => { if (!this.selection && e.pointerType !== 'touch' && document.activeElement !== this.stage) this.clear(); }, options);
     this.stage.addEventListener('blur', () => this.clear(), options);
     this.stage.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { this.clear(); return; }
+      if (e.key === 'Escape') { this.cancelSelection(); this.clear(); return; }
+      if (e.key === '0') { e.preventDefault(); this.resetZoom(); return; }
       if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)) return;
       e.preventDefault();
       const horizontal = this.view.orientation === 'horizontal';
-      const xs = [...new Set(this.visible.flatMap(s => s.points.map(p => p[horizontal ? 1 : 0])))].sort((a,b) => a-b);
+      const bounds = horizontal ? this.geometry.yDomain : this.geometry.xDomain;
+      const xs = [...new Set(this.visible.flatMap(s => s.points.map(p => p[horizontal ? 1 : 0])))].filter(n => n >= bounds[0] && n <= bounds[1]).sort((a,b) => a-b);
+      if (!xs.length) return;
       let i = this.activeX == null ? -1 : xs.indexOf(this.activeX);
       i = e.key === 'Home' ? 0 : e.key === 'End' ? xs.length - 1 : clamp(i + (['ArrowRight','ArrowDown'].includes(e.key) ? 1 : -1), 0, xs.length - 1);
       this.inspect(xs[i], true);
@@ -98,7 +108,7 @@ class ResearchPlot {
     this.setView(0);
   }
   setView(index) {
-    this.index = index; this.fullRange = false; this.clear();
+    this.cancelSelection(); this.index = index; this.fullRange = false; this.zoom = null; this.clear();
     if (!this.visible.length) this.hidden.clear();
     this.host.querySelectorAll('[data-view]').forEach((button, i) => { button.setAttribute('aria-selected', String(i === index)); button.tabIndex = i === index ? 0 : -1; });
     if (this.chart.views.length > 1) this.host.querySelector('.plot-panel').setAttribute('aria-labelledby', `${this.uid}-tab-${index}`);
@@ -107,7 +117,9 @@ class ResearchPlot {
     this.renderLegend(); this.updateRange(); this.draw();
   }
   updateRange() {
-    const button = this.host.querySelector('.plot-range'); button.hidden = !this.view.yDomain;
+    this.host.querySelector('[data-action="reset-zoom"]').hidden = !this.zoom;
+    this.host.querySelector('.plot-zoom-hint').textContent = this.zoom ? 'Click to zoom out' : 'Drag to zoom';
+    const button = this.host.querySelector('[data-action="range"]'); button.hidden = !this.view.yDomain;
     button.textContent = this.fullRange ? 'Focus range' : 'Full range';
     button.setAttribute('aria-label', `${this.fullRange ? 'Focus the loss range' : 'Show the full loss range'} for ${this.chart.title}`);
   }
@@ -117,13 +129,14 @@ class ResearchPlot {
   }
   draw() {
     if (!this.host.isConnected) return;
+    this.cancelSelection();
     const v = this.view, horizontal = v.orientation === 'horizontal';
     const width = Math.max(260, this.stage.clientWidth), mobile = width < 480;
     const height = horizontal ? Math.max(240, v.categories.length * 43 + 38) : mobile ? 265 : 320;
     const margin = { l: horizontal ? (mobile ? 103 : 132) : 47, r: 18, t: 17, b: 35 };
     const all = v.series.flatMap(s => s.points), xs = all.map(p => p[0]), ys = all.map(p => p[1]);
-    const xDomain = v.xDomain || (!horizontal && v.categories ? [-.2, v.categories.length - .8] : extent(v.reference != null && horizontal ? [...xs,v.reference] : xs, .05));
-    const yDomain = horizontal ? [-.6, v.categories.length - .4] : v.yDomain && !this.fullRange ? v.yDomain : extent(v.reference != null ? [...ys,v.reference] : ys);
+    const xDomain = this.zoom?.x || v.xDomain || (!horizontal && v.categories ? [-.2, v.categories.length - .8] : extent(v.reference != null && horizontal ? [...xs,v.reference] : xs, .05));
+    const yDomain = this.zoom?.y || (horizontal ? [-.6, v.categories.length - .4] : v.yDomain && !this.fullRange ? v.yDomain : extent(v.reference != null ? [...ys,v.reference] : ys));
     const pw = width - margin.l - margin.r, ph = height - margin.t - margin.b;
     const x = n => margin.l + (n - xDomain[0]) / (xDomain[1] - xDomain[0]) * pw;
     const y = n => horizontal ? margin.t + (n - yDomain[0]) / (yDomain[1] - yDomain[0]) * ph : margin.t + (yDomain[1] - n) / (yDomain[1] - yDomain[0]) * ph;
@@ -131,14 +144,14 @@ class ResearchPlot {
     const xt = v.xTicks ? { ticks:v.xTicks,digits:0 } : !horizontal && v.categories ? { ticks:v.categories.map((_,i)=>i),digits:0 } : tickValues(...xDomain,mobile ? 4 : 6);
     const yt = horizontal ? { ticks:v.categories.map((_,i)=>i),digits:0 } : tickValues(...yDomain,5);
     let markup = `<defs><clipPath id="${this.uid}-clip"><rect x="${margin.l}" y="${margin.t}" width="${pw}" height="${ph}"/></clipPath></defs>`;
-    for (const n of yt.ticks) {
+    for (const n of yt.ticks.filter(n => n >= yDomain[0] && n <= yDomain[1])) {
       const label = horizontal ? v.categories[n] : number(n, yt.digits);
       markup += `<line class="plot-grid" x1="${margin.l}" x2="${width-margin.r}" y1="${y(n)}" y2="${y(n)}"/><text class="plot-tick" x="${margin.l-10}" y="${y(n)+4}" text-anchor="end">${escape(label)}</text>`;
     }
     markup += `<line class="plot-baseline" x1="${margin.l}" x2="${width-margin.r}" y1="${height-margin.b}" y2="${height-margin.b}"/>`;
-    for (const n of xt.ticks) markup += `<text class="plot-tick" x="${x(n)}" y="${height-12}" text-anchor="middle">${escape(!horizontal && v.categories ? v.categories[n] : number(n,xt.digits))}</text>`;
-    if (v.reference != null) markup += horizontal ? `<line class="plot-reference" x1="${x(v.reference)}" x2="${x(v.reference)}" y1="${margin.t}" y2="${height-margin.b}"/>` : `<line class="plot-reference" x1="${margin.l}" x2="${width-margin.r}" y1="${y(v.reference)}" y2="${y(v.reference)}"/>`;
+    for (const n of xt.ticks.filter(n => n >= xDomain[0] && n <= xDomain[1])) markup += `<text class="plot-tick" x="${x(n)}" y="${height-12}" text-anchor="middle">${escape(!horizontal && v.categories ? v.categories[n] : number(n,xt.digits))}</text>`;
     markup += `<g clip-path="url(#${this.uid}-clip)">`;
+    if (v.reference != null) markup += horizontal ? `<line class="plot-reference" x1="${x(v.reference)}" x2="${x(v.reference)}" y1="${margin.t}" y2="${height-margin.b}"/>` : `<line class="plot-reference" x1="${margin.l}" x2="${width-margin.r}" y1="${y(v.reference)}" y2="${y(v.reference)}"/>`;
     for (const s of this.visible) {
       if (horizontal) {
         for (const p of s.points) {
@@ -151,22 +164,62 @@ class ResearchPlot {
         if (v.markers) for (const p of s.points) markup += `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="3.5" fill="${color(s)}"/>`;
       }
     }
-    markup += `</g><g class="plot-cursor" aria-hidden="true"></g>`;
+    markup += `</g><g class="plot-cursor" clip-path="url(#${this.uid}-clip)" aria-hidden="true"></g><g class="plot-selection-layer" aria-hidden="true"></g>`;
     this.svg.setAttribute('viewBox',`0 0 ${width} ${height}`); this.svg.setAttribute('width',width); this.svg.setAttribute('height',height);
     this.svg.innerHTML = markup;
     if (this.activeX != null) this.inspect(this.activeX);
   }
+  plotPoint(event) {
+    const g = this.geometry, rect = this.svg.getBoundingClientRect();
+    return { x: (event.clientX - rect.left) / rect.width * g.width, y: (event.clientY - rect.top) / rect.height * g.height };
+  }
+  startSelection(event) {
+    if (!this.geometry || event.pointerType === 'touch' || event.button !== 0 || !event.isPrimary) return;
+    const p = this.plotPoint(event), g = this.geometry;
+    if (p.x < g.margin.l || p.x > g.width - g.margin.r || p.y < g.margin.t || p.y > g.height - g.margin.b) return;
+    this.selection = { start: p, end: p, pointerId: event.pointerId };
+    this.stage.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+  moveSelection(event) {
+    if (event.pointerId !== this.selection.pointerId) return;
+    const p = this.plotPoint(event), g = this.geometry, s = this.selection;
+    s.end = { x: clamp(p.x, g.margin.l, g.width - g.margin.r), y: clamp(p.y, g.margin.t, g.height - g.margin.b) };
+    this.clear();
+    this.svg.querySelector('.plot-selection-layer').innerHTML = `<rect class="plot-selection" x="${Math.min(s.start.x,s.end.x)}" y="${Math.min(s.start.y,s.end.y)}" width="${Math.abs(s.end.x-s.start.x)}" height="${Math.abs(s.end.y-s.start.y)}"/>`;
+  }
+  finishSelection(event) {
+    if (!this.selection || event.pointerId !== this.selection.pointerId) return;
+    this.moveSelection(event);
+    const s = this.selection, g = this.geometry;
+    this.cancelSelection();
+    const dx = Math.abs(s.end.x-s.start.x), dy = Math.abs(s.end.y-s.start.y);
+    if (dx < 8 || dy < 8) { if (this.zoom && dx < 8 && dy < 8) this.resetZoom(); else this.inspectEvent(event); return; }
+    const toX = px => g.xDomain[0] + (px-g.margin.l) / g.pw * (g.xDomain[1]-g.xDomain[0]);
+    const toY = py => g.horizontal ? g.yDomain[0] + (py-g.margin.t) / g.ph * (g.yDomain[1]-g.yDomain[0]) : g.yDomain[1] - (py-g.margin.t) / g.ph * (g.yDomain[1]-g.yDomain[0]);
+    this.zoom = { x: [toX(s.start.x),toX(s.end.x)].sort((a,b)=>a-b), y: [toY(s.start.y),toY(s.end.y)].sort((a,b)=>a-b) };
+    this.clear(); this.updateRange(); this.draw();
+    this.host.querySelector('.plot-a11y').textContent = 'Zoomed to selection. Click the graph, use Reset zoom, or press 0 to restore the view.';
+  }
+  cancelSelection() {
+    const s = this.selection; this.selection = null;
+    if (s && this.stage.hasPointerCapture(s.pointerId)) this.stage.releasePointerCapture(s.pointerId);
+    this.svg?.querySelector('.plot-selection-layer')?.replaceChildren();
+  }
+  resetZoom() { this.cancelSelection(); this.zoom = null; this.clear(); this.updateRange(); this.draw(); this.host.querySelector('.plot-a11y').textContent = 'Zoom reset.'; }
   inspectEvent(event) {
     if (!this.geometry) return;
     const g = this.geometry, rect = this.stage.getBoundingClientRect();
     if (g.horizontal) {
       const py = (event.clientY - rect.top) / rect.height * g.height;
-      this.inspect(clamp(Math.round(g.yDomain[0] + (py - g.margin.t) / g.ph * (g.yDomain[1]-g.yDomain[0])),0,this.view.categories.length-1));
+      const value = clamp(Math.round(g.yDomain[0] + (py - g.margin.t) / g.ph * (g.yDomain[1]-g.yDomain[0])),0,this.view.categories.length-1);
+      if (value < g.yDomain[0] || value > g.yDomain[1]) { this.clear(); return; }
+      this.inspect(value);
     } else {
       const px = (event.clientX - rect.left) / rect.width * g.width;
       const value = g.xDomain[0] + (px - g.margin.l) / g.pw * (g.xDomain[1]-g.xDomain[0]);
-      const candidates = this.visible.map(s=>nearest(s.points,value)).filter(Boolean);
-      if (!candidates.length) return;
+      const candidates = this.visible.map(s=>nearest(s.points,value)).filter(p => p && p[0] >= g.xDomain[0] && p[0] <= g.xDomain[1]);
+      if (!candidates.length) { this.clear(); return; }
       const p = candidates.reduce((a,b)=>Math.abs(a[0]-value)<Math.abs(b[0]-value)?a:b);
       this.inspect(p[0]);
     }
@@ -194,7 +247,7 @@ class ResearchPlot {
     if (this.tooltip) this.tooltip.hidden = true;
     this.svg?.querySelector('.plot-cursor')?.replaceChildren();
   }
-  dispose() { this.resize?.disconnect();cancelAnimationFrame(this.pendingResize);this.events.abort(); }
+  dispose() { this.cancelSelection();this.resize?.disconnect();cancelAnimationFrame(this.pendingResize);this.events.abort(); }
 }
 
 export function setupResearchPlots(root) {
@@ -220,7 +273,7 @@ function setupTwoPass(host) {
   let stage=0,token=1;const uid=`two-pass-${++counter}`;const events=new AbortController();
   const names=['a','b','c'],tabs=['First pass','Interleave','Second pass'];
   host.className='research-diagram';
-  host.innerHTML=`<header class="plot-header"><div><h3>Two passes, one shared backbone</h3><p class="plot-meta">6 loops per pass · zero Jacobi iterations</p></div></header><div class="diagram-controls"><div class="plot-tabs" role="tablist" aria-label="Two pass stages">${tabs.map((t,i)=>`<button type="button" data-stage="${i}" id="${uid}-tab-${i}" aria-controls="${uid}-panel" role="tab" aria-selected="${i===0}">${t}</button>`).join('')}</div><div class="diagram-focus" role="group" aria-label="Token to follow"><span>Follow</span>${names.map((n,i)=>`<button type="button" data-token="${i}" aria-pressed="${i===token}">${n}</button>`).join('')}</div></div><p class="diagram-explanation" aria-live="polite"></p><div class="two-pass-canvas" id="${uid}-panel" role="tabpanel" tabindex="0" aria-labelledby="${uid}-tab-0"></div>`;
+  host.innerHTML=`<header class="plot-header"><div class="plot-control-row"><div class="plot-tabs" role="tablist" aria-label="Two pass stages">${tabs.map((t,i)=>`<button type="button" data-stage="${i}" id="${uid}-tab-${i}" aria-controls="${uid}-panel" role="tab" aria-selected="${i===0}">${t}</button>`).join('')}</div><div class="diagram-focus" role="group" aria-label="Token to follow"><span>Follow</span>${names.map((n,i)=>`<button type="button" data-token="${i}" aria-pressed="${i===token}">${n}</button>`).join('')}</div></div><h3>Two passes, one shared backbone</h3></header><div class="two-pass-canvas" id="${uid}-panel" role="tabpanel" tabindex="0" aria-labelledby="${uid}-tab-0"></div><p class="diagram-explanation" aria-live="polite"></p><p class="plot-meta">6 loops per pass · zero Jacobi iterations</p>`;
   const pill=(text,i,latent=false,active=true)=>`<span class="token-node ${latent?'latent-node':''} ${active?'':'token-muted'} ${i===token?'token-selected':''}">${text}</span>`;
   function draw(){
     host.querySelectorAll('[data-stage]').forEach((b,i)=>{b.setAttribute('aria-selected',String(i===stage));b.tabIndex=i===stage?0:-1;});
@@ -240,7 +293,7 @@ function setupTwoPass(host) {
 
 function setupVocabulary(host) {
   const events=new AbortController();host.className='research-diagram vocabulary-budget';
-  host.innerHTML=`<header class="plot-header"><div><h3>How much of 3M goes to vocabulary?</h3><p class="plot-meta">Illustrative parameter arithmetic · tied embeddings · width 384</p></div></header><label class="budget-slider">Vocabulary size <output>2,048</output><input type="range" min="512" max="16384" step="512" value="2048" aria-label="Vocabulary size"></label><div class="budget-preset" role="group" aria-label="Vocabulary presets">${[2048,4096,8192,16384].map(n=>`<button type="button" data-vocab="${n}">${number(n)}</button>`).join('')}</div><div class="budget-bar" role="img"><span></span></div><div class="budget-numbers" aria-live="polite"></div>`;
+  host.innerHTML=`<header class="plot-header"><div class="plot-tabs" role="group" aria-label="Vocabulary presets">${[2048,4096,8192,16384].map(n=>`<button type="button" data-vocab="${n}">${number(n)}</button>`).join('')}</div><h3>How much of 3M goes to vocabulary?</h3></header><label class="budget-slider">Vocabulary size <output>2,048</output><input type="range" min="512" max="16384" step="512" value="2048" aria-label="Vocabulary size"></label><div class="budget-bar" role="img"><span></span></div><div class="budget-numbers" aria-live="polite"></div><p class="plot-meta">Illustrative parameter arithmetic · tied embeddings · width 384</p>`;
   const slider=host.querySelector('input');
   function draw(){const vocab=Number(slider.value),embedding=vocab*384,remaining=3000000-embedding;host.querySelector('output').textContent=number(vocab);host.querySelector('.budget-bar span').style.width=`${Math.min(100,embedding/3000000*100)}%`;host.classList.toggle('budget-over',remaining<0);host.querySelector('.budget-bar').setAttribute('aria-label',`${number(embedding)} embedding parameters. ${fixed(embedding/3000000*100,1)} percent of 3 million`);host.querySelector('.budget-numbers').innerHTML=`<div><strong>${number(embedding)}</strong><span>embedding parameters</span></div><div><strong>${remaining<0?'+':''}${number(Math.abs(remaining))}</strong><span>${remaining<0?'over the entire budget':'left for the rest of the model'}</span></div>`;host.querySelectorAll('[data-vocab]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.vocab)===vocab)));}
   slider.addEventListener('input',draw,{signal:events.signal});host.addEventListener('click',e=>{const b=e.target.closest('[data-vocab]');if(b){slider.value=b.dataset.vocab;draw();}},{signal:events.signal});draw();return()=>events.abort();
@@ -249,7 +302,7 @@ function setupVocabulary(host) {
 function setupArchitecture(host) {
   const events=new AbortController();let mode=0;const uid=`architecture-${++counter}`;host.className='research-diagram';
   const models=[{name:'Six loop',schedule:[0,0,0,0,0,0],stored:1,width:384,mlp:'ReLU² · 2,096',attention:'6 head MHA · per head XSA + sigmoid gates',context:'8,192',inference:'2,987,712',training:'4,757,184'},{name:'Pulvis v2 shape',schedule:[0,1,2,3,4,2,3,4,2,3,4,5,6,7,8,9],stored:10,width:160,mlp:'SwiGLU · 352',attention:'5 query heads · 1 KV head',context:'1,024',inference:'2,637,376',training:'2,944,576'}];
-  host.innerHTML='<header class="plot-header"><div><h3>Two different allocations of the parameter budget</h3><p class="plot-meta">Each letter identifies a stored block. Repeated letters share weights.</p></div></header><div class="plot-tabs" role="tablist" aria-label="Architecture layout"><button type="button" role="tab" data-architecture="0">Six loop</button><button type="button" role="tab" data-architecture="1">Pulvis v2 shape</button></div><div class="architecture-body"></div>';
+  host.innerHTML='<header class="plot-header"><div class="plot-tabs" role="tablist" aria-label="Architecture layout"><button type="button" role="tab" data-architecture="0">Six loop</button><button type="button" role="tab" data-architecture="1">Pulvis v2 shape</button></div><h3>Two different allocations of the parameter budget</h3></header><div class="architecture-body"></div><p class="plot-meta">Each letter identifies a stored block. Repeated letters share weights.</p>';
   host.querySelectorAll('[data-architecture]').forEach((b,i)=>{b.id=`${uid}-tab-${i}`;b.setAttribute('aria-controls',`${uid}-panel`);});
   const panel=host.querySelector('.architecture-body');panel.id=`${uid}-panel`;panel.setAttribute('role','tabpanel');panel.tabIndex=0;
   function draw(){panel.setAttribute('aria-labelledby',`${uid}-tab-${mode}`);const m=models[mode];host.querySelectorAll('[data-architecture]').forEach((b,i)=>{b.setAttribute('aria-selected',String(i===mode));b.tabIndex=i===mode?0:-1;});host.querySelector('.architecture-body').innerHTML=`<div class="architecture-schedule" aria-label="Block schedule ${m.schedule.map(n=>String.fromCharCode(65+n)).join(', ')}">${m.schedule.map(n=>`<span style="--block-color:${COLORS[n%COLORS.length]}">${String.fromCharCode(65+n)}</span>`).join('')}</div><dl class="architecture-specs">${[['Stored blocks',m.stored],['Block applications',m.schedule.length],['Hidden width',m.width],['Attention',m.attention],['FFN',m.mlp],['Context',m.context],['Inference parameters',m.inference],['Training parameters',m.training]].map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;}
