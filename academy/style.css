@@ -1027,7 +1027,7 @@ html {
   background: var(--ink);
 }
 .hero-layout {
-  grid-template-columns: 1.12fr 0.88fr;
+  grid-template-columns: 0.88fr 1.12fr;
   gap: 6%;
   min-height: 505px;
   padding: 36px 0px;
@@ -1046,7 +1046,7 @@ html {
   position: relative;
   width: 100%;
   max-width: 440px;
-  justify-self: end;
+  justify-self: start;
 }
 .hero-photo img {
   width: 100%;
