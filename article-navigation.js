@@ -21,11 +21,11 @@ const shortTitles = {
 export function articleNavigation(headings, slug) {
   if (headings.length < 4) return '';
   return `<nav class="article-rail" aria-label="Article sections">
-    <div class="article-rail-header"><span>On this page</span><span data-reading-progress hidden aria-label="Reading progress"></span></div>
-    <div class="article-rail-body"><span class="article-rail-track" aria-hidden="true"><span></span></span>
-      <ol>${headings.map(([, id, title], index) => `<li><a href="#blogs/${encodeURIComponent(slug)}/${escapeHTML(id)}" data-section="${escapeHTML(id)}" title="${escapeHTML(title)}"><span class="article-rail-index" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span><span>${escapeHTML(shortTitles[id] || title)}</span></a></li>`).join('')}</ol>
+    <div class="article-rail-header">On this page</div>
+    <ol class="article-rail-body">${headings.map(([, id, title]) => `<li><a href="#blogs/${encodeURIComponent(slug)}/${escapeHTML(id)}" data-section="${escapeHTML(id)}" title="${escapeHTML(title)}">${escapeHTML(shortTitles[id] || title)}</a></li>`).join('')}</ol>
+    <div class="article-rail-footer"><span class="article-rail-track" aria-hidden="true"><span></span></span>
+      <div><a class="article-rail-top" href="#blogs/${encodeURIComponent(slug)}">↑ Back to top</a><span data-reading-progress hidden aria-label="Reading progress"></span></div>
     </div>
-    <a class="article-rail-top" href="#blogs/${encodeURIComponent(slug)}">↑ Back to top</a>
   </nav>`;
 }
 
@@ -70,7 +70,6 @@ export function setupArticleNavigation(root) {
       links.forEach((link, index) => {
         if (index === current) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
-        link.classList.toggle('is-read', index < current);
       });
       const activeLink = links[current];
       if (activeLink && rail.clientHeight && rail.scrollHeight > rail.clientHeight) {

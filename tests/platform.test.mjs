@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir, access } from 'node:fs/promises';
-import { nearest, tickValues } from '../research-plots.js';
+import { nearest, tickValues, sliceYDomain } from '../research-plots.js';
 const dist = new URL('../', import.meta.url);
 const pages=['index.html','blogs.html','papers.html','purrence.html','exoformer.html','lr-attnres.html','chess.html'];
 test('every readable entry page has a unique main heading and resolvable local assets and links', async()=>{
@@ -50,4 +50,13 @@ test('nearest point inspection and axis ticks handle edges and narrow value rang
     assert.ok(ticks.length>=2);assert.ok(ticks.every(Number.isFinite));
     for(let i=1;i<ticks.length;i++)assert.ok(ticks[i]>ticks[i-1]);
   }
+});
+test('slice zoom fits the selected curves, including interpolated boundaries',()=>{
+  const close=(actual,expected)=>actual.forEach((value,i)=>assert.ok(Math.abs(value-expected[i])<1e-12));
+  close(sliceYDomain([{points:[[0,100],[1,2],[2,3],[3,100]]}],[1,2]),[1.91,3.09]);
+  close(sliceYDomain([{points:[[0,0],[10,10]]}],[2.5,4.5]),[2.32,4.68]);
+  close(sliceYDomain([{points:[[0,1],[1,2]]},{points:[[0,4],[1,5]]}],[0,1]),[.64,5.36]);
+  close(sliceYDomain([{points:[[0,5],[1,5]]}],[0,1]),[4.9775,5.0225]);
+  assert.equal(sliceYDomain([{points:[[0,0],[10,10]]}],[20,30]),null);
+  assert.equal(sliceYDomain([],[0,1]),null);
 });

@@ -8,6 +8,7 @@ const number = (value, digits = 4) => Number(value).toLocaleString('en-US', { ma
 const fixed = (value, digits = 4) => Number(value).toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: digits }).replace('-', '−');
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const color = series => COLORS[series.color % COLORS.length];
+const isSliceDrag = ({ start, end }, geometry) => !geometry.horizontal && Math.abs(end.y - start.y) <= Math.max(8, Math.abs(end.x - start.x) / 3);
 
 export function nearest(points, value) {
   if (!points.length) return null;
@@ -28,6 +29,21 @@ function extent(values, padding = .09) {
   let min = Math.min(...values), max = Math.max(...values);
   const delta = (max - min) || Math.max(.05, Math.abs(min) * .05);
   return [min - delta * padding, max + delta * padding];
+}
+export function sliceYDomain(series, bounds) {
+  const [minX, maxX] = bounds, values = [];
+  for (const { points } of series) {
+    for (let i = 0; i < points.length; i++) {
+      const [x, y] = points[i];
+      if (x >= minX && x <= maxX) values.push(y);
+      if (!i) continue;
+      const [previousX, previousY] = points[i - 1];
+      for (const edge of bounds) {
+        if (previousX < edge && x > edge) values.push(previousY + (y - previousY) * (edge - previousX) / (x - previousX));
+      }
+    }
+  }
+  return values.length ? extent(values) : null;
 }
 function chartData(id) {
   if (!CACHE.has(id)) CACHE.set(id, fetch(`./blog/purrence/charts/${encodeURIComponent(id)}.json?v=attention-compute-plateau-20261005`).then(r => {
@@ -58,7 +74,7 @@ class ResearchPlot {
       <div class="plot-panel" id="${this.uid}-panel" ${chart.views.length > 1 ? `role="tabpanel" aria-labelledby="${this.uid}-tab-0"` : ''}>
         <div class="plot-legend" aria-label="Visible series"></div>
         <div class="plot-axis-header"><span class="plot-y-title"></span><div class="plot-actions"><span class="plot-zoom-hint">Drag to zoom</span><button type="button" class="plot-range" data-action="reset-zoom" hidden>Reset zoom</button><button type="button" class="plot-range" data-action="range" hidden>Full range</button></div></div>
-        <div class="plot-stage" data-zoomable="true" tabindex="0" role="group" aria-label="Interactive plot. Drag a rectangle to zoom. Click the zoomed graph or press 0 to reset zoom. Point or tap to inspect values. Use left and right arrow keys to move through points. Press Escape to clear."><svg class="plot-svg" role="img" aria-labelledby="${this.uid}-title"></svg><div class="plot-tooltip" hidden></div></div>
+        <div class="plot-stage" data-zoomable="true" tabindex="0" role="group" aria-label="Interactive plot. Drag horizontally to zoom into a slice and fit the y-axis, or draw a rectangle to zoom both axes. Click the zoomed graph or press 0 to reset zoom. Point or tap to inspect values. Use left and right arrow keys to move through points. Press Escape to clear."><svg class="plot-svg" role="img" aria-labelledby="${this.uid}-title"></svg><div class="plot-tooltip" hidden></div></div>
         <div class="plot-x-title"></div><div class="plot-a11y" aria-live="polite" aria-atomic="true"></div>
       </div><p class="plot-meta">${escape(chart.meta)}</p>`;
     this.svg = host.querySelector('svg'); this.stage = host.querySelector('.plot-stage'); this.tooltip = host.querySelector('.plot-tooltip');
@@ -118,7 +134,7 @@ class ResearchPlot {
   }
   updateRange() {
     this.host.querySelector('[data-action="reset-zoom"]').hidden = !this.zoom;
-    this.host.querySelector('.plot-zoom-hint').textContent = this.zoom ? 'Click to zoom out' : 'Drag to zoom';
+    this.host.querySelector('.plot-zoom-hint').textContent = this.zoom ? 'Click to zoom out' : 'Drag horizontally to zoom';
     const button = this.host.querySelector('[data-action="range"]'); button.hidden = !this.view.yDomain;
     button.textContent = this.fullRange ? 'Focus range' : 'Full range';
     button.setAttribute('aria-label', `${this.fullRange ? 'Focus the loss range' : 'Show the full loss range'} for ${this.chart.title}`);
@@ -136,7 +152,7 @@ class ResearchPlot {
     const margin = { l: horizontal ? (mobile ? 103 : 132) : 47, r: 18, t: 17, b: 35 };
     const all = v.series.flatMap(s => s.points), xs = all.map(p => p[0]), ys = all.map(p => p[1]);
     const xDomain = this.zoom?.x || v.xDomain || (!horizontal && v.categories ? [-.2, v.categories.length - .8] : extent(v.reference != null && horizontal ? [...xs,v.reference] : xs, .05));
-    const yDomain = this.zoom?.y || (horizontal ? [-.6, v.categories.length - .4] : v.yDomain && !this.fullRange ? v.yDomain : extent(v.reference != null ? [...ys,v.reference] : ys));
+    const yDomain = this.zoom?.y || (this.zoom?.fitY && sliceYDomain(this.visible, this.zoom.x)) || (horizontal ? [-.6, v.categories.length - .4] : v.yDomain && !this.fullRange ? v.yDomain : extent(v.reference != null ? [...ys,v.reference] : ys));
     const pw = width - margin.l - margin.r, ph = height - margin.t - margin.b;
     const x = n => margin.l + (n - xDomain[0]) / (xDomain[1] - xDomain[0]) * pw;
     const y = n => horizontal ? margin.t + (n - yDomain[0]) / (yDomain[1] - yDomain[0]) * ph : margin.t + (yDomain[1] - n) / (yDomain[1] - yDomain[0]) * ph;
@@ -186,18 +202,19 @@ class ResearchPlot {
     const p = this.plotPoint(event), g = this.geometry, s = this.selection;
     s.end = { x: clamp(p.x, g.margin.l, g.width - g.margin.r), y: clamp(p.y, g.margin.t, g.height - g.margin.b) };
     this.clear();
-    this.svg.querySelector('.plot-selection-layer').innerHTML = `<rect class="plot-selection" x="${Math.min(s.start.x,s.end.x)}" y="${Math.min(s.start.y,s.end.y)}" width="${Math.abs(s.end.x-s.start.x)}" height="${Math.abs(s.end.y-s.start.y)}"/>`;
+    const slice = isSliceDrag(s, g);
+    this.svg.querySelector('.plot-selection-layer').innerHTML = `<rect class="plot-selection" x="${Math.min(s.start.x,s.end.x)}" y="${slice ? g.margin.t : Math.min(s.start.y,s.end.y)}" width="${Math.abs(s.end.x-s.start.x)}" height="${slice ? g.ph : Math.abs(s.end.y-s.start.y)}"/>`;
   }
   finishSelection(event) {
     if (!this.selection || event.pointerId !== this.selection.pointerId) return;
     this.moveSelection(event);
-    const s = this.selection, g = this.geometry;
+    const s = this.selection, g = this.geometry, slice = isSliceDrag(s, g);
     this.cancelSelection();
     const dx = Math.abs(s.end.x-s.start.x), dy = Math.abs(s.end.y-s.start.y);
-    if (dx < 8 || dy < 8) { if (this.zoom && dx < 8 && dy < 8) this.resetZoom(); else this.inspectEvent(event); return; }
+    if (dx < 8 || (!slice && dy < 8)) { if (this.zoom && dx < 8 && dy < 8) this.resetZoom(); else this.inspectEvent(event); return; }
     const toX = px => g.xDomain[0] + (px-g.margin.l) / g.pw * (g.xDomain[1]-g.xDomain[0]);
     const toY = py => g.horizontal ? g.yDomain[0] + (py-g.margin.t) / g.ph * (g.yDomain[1]-g.yDomain[0]) : g.yDomain[1] - (py-g.margin.t) / g.ph * (g.yDomain[1]-g.yDomain[0]);
-    this.zoom = { x: [toX(s.start.x),toX(s.end.x)].sort((a,b)=>a-b), y: [toY(s.start.y),toY(s.end.y)].sort((a,b)=>a-b) };
+    this.zoom = { x: [toX(s.start.x),toX(s.end.x)].sort((a,b)=>a-b), y: slice ? null : [toY(s.start.y),toY(s.end.y)].sort((a,b)=>a-b), fitY: slice };
     this.clear(); this.updateRange(); this.draw();
     this.host.querySelector('.plot-a11y').textContent = 'Zoomed to selection. Click the graph, use Reset zoom, or press 0 to restore the view.';
   }

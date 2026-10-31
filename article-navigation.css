@@ -5,10 +5,11 @@
 .article-contents summary::before { content: '+'; color: var(--accent); font-size: 20px; line-height: 1; }
 .article-contents[open] summary::before { content: '−'; }
 .article-progress-label { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; }
-.article-contents ol { margin: 16px 0 8px; padding-left: 26px; font-size: 14px; line-height: 1.7; }
+.article-contents ol { list-style: none; margin: 12px 0 4px; padding-left: 0; font-size: 14px; line-height: 1.7; }
 .article-contents[open] ol { max-height: 60vh; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.article-contents li { padding: 4px 0 4px 4px; }
-.article-contents a { text-decoration: underline; text-decoration-color: #a59b9e40; }
+.article-contents li { padding: 3px 0; }
+.article-contents a { color: var(--muted); text-decoration: none; }
+.article-contents a:hover { color: var(--text); }
 .article-body h2[id] { scroll-margin-top: 82px; }
 .article-body h2[id]:focus { outline: none; }
 @media (min-width: 1280px) {
@@ -20,20 +21,21 @@
     overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a59b9e40 transparent;
     font: 400 13px/1.45 var(--font); color: var(--muted);
   }
-  .article-rail-header { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 15px; font-size: 12px; }
-  .article-rail-header [data-reading-progress] { color: var(--accent); font-variant-numeric: tabular-nums; }
-  .article-rail-body { position: relative; padding-left: 12px; }
-  .article-rail-track { position: absolute; inset: 5px auto 5px 0; width: 1px; background: #a59b9e30; overflow: hidden; }
-  .article-rail-track > span { display: block; width: 100%; height: 100%; background: var(--accent); transform: scaleY(var(--reading-progress, 0)); transform-origin: top; }
-  .article-rail ol { list-style: none; padding: 0; margin: 0; }
+  .article-rail-header { margin-bottom: 14px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  .article-rail-body { list-style: none; margin: 0; padding: 0; border-left: 1px solid #a59b9e26; }
   .article-rail li { padding: 0; margin: 0; }
   .article-rail a { font: inherit; text-decoration: none; }
-  .article-rail li a { display: flex; gap: 6px; align-items: baseline; min-height: 30px; padding: 6px 0; color: var(--muted); overflow-wrap: anywhere; transition: color 150ms ease; }
-  .article-rail-index { flex: none; color: #a49499; font-size: 10px; font-variant-numeric: tabular-nums; }
-  .article-rail a:hover, .article-rail a:focus-visible, .article-rail li a[aria-current='location'] { color: var(--text); }
-  .article-rail a[aria-current='location'] .article-rail-index { color: var(--accent); }
-  .article-rail a.is-read .article-rail-index { color: #ab7775; }
-  .article-rail .article-rail-top { display: inline-flex; min-height: 36px; padding: 16px 0 0 12px; font-size: 12px; color: var(--muted); }
+  .article-rail li a { position: relative; display: block; min-height: 28px; padding: 5px 0 5px 13px; color: var(--muted); overflow-wrap: anywhere; transition: color 150ms ease; }
+  .article-rail li a::before { content: ''; position: absolute; left: -1px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: var(--accent); opacity: 0; }
+  .article-rail a:hover, .article-rail a:focus-visible { color: var(--text); }
+  .article-rail li a[aria-current='location'] { color: var(--accent); font-weight: 500; }
+  .article-rail a[aria-current='location']::before { opacity: 1; }
+  .article-rail-footer { margin-top: 20px; font-size: 11px; }
+  .article-rail-track { display: block; height: 2px; background: #a59b9e26; overflow: hidden; border-radius: 2px; }
+  .article-rail-track > span { display: block; height: 100%; background: var(--accent); transform: scaleX(var(--reading-progress, 0)); transform-origin: left; }
+  .article-rail-footer > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; }
+  .article-rail-top { display: inline-flex; align-items: center; min-height: 32px; color: var(--muted); }
+  .article-rail-footer [data-reading-progress] { color: var(--muted); font-variant-numeric: tabular-nums; }
   .article-body h2[id] { scroll-margin-top: 28px; }
 }
 @media (max-width: 620px) { .article-contents a { display: block; padding-block: 5px; } }

@@ -1,4 +1,4 @@
-import { articleNavigation } from './article-navigation.js?v=blog-cards-20261005';
+import { articleNavigation } from './article-navigation.js?v=reading-controls-20261031';
 import { escapeHTML as escape, safeURL } from './site-utils.js';
 
 export const notebookKinds = { idea: 'ideas', note: 'working notes', essay: 'essays' };
