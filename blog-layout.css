@@ -23,7 +23,7 @@
 .notebook-filters { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 28px; }
 .notebook-filters .quiet-button { padding: 6px 0; border: 0; border-radius: 0; font-size: 14px; min-height: 36px; }
 .notebook-filters .quiet-button[aria-pressed='true'] { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 7px; background: none; }
-.notebook-filters span { opacity: .6; margin-left: 3px; font-size: 12px; }
+.notebook-filters span { display: inline-block; opacity: .6; margin-left: 3px; font-size: 12px; }
 .notebook-page .entry-list { display: grid; gap: var(--gap); }
 .notebook-entry { margin: 0; }
 .notebook-entry > a { display: block; padding: var(--gap); border: 1px solid #a59b9e26; border-radius: 8px; background: #2b2628; text-decoration: none; transition: border-color .15s ease, background-color .15s ease; }
