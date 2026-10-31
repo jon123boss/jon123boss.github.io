@@ -27,17 +27,12 @@ const navLinks = [...document.querySelectorAll('.site-header nav a')];
 document.querySelectorAll('[data-route]').forEach(link => {
   if (link.tagName === 'A') link.href = `#${link.dataset.route}`;
 });
-const escape = (value = '') => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const name = document.querySelector('.wordmark');
 name.querySelector('.wordmark-name').textContent = site.name;
 name.setAttribute('aria-label', `${site.name}, home`);
 
 function blogs() {
   return notebookPage(site.blogs, notebookFilter);
-}
-
-function blogPost(post) {
-  return notebookPost(post);
 }
 
 function revealPage() {
@@ -82,7 +77,7 @@ async function render({ focus = false } = {}) {
   let title = 'About me';
   if (section === 'blogs' && (!slug || post)) {
     active = 'blogs'; title = post ? post.title : 'Blogs';
-    main.innerHTML = post ? blogPost(post) : blogs();
+    main.innerHTML = post ? notebookPost(post) : blogs();
     if (post) { main.dataset.post = post.slug; disposeResearchPlots = setupResearchPlots(main); disposeArticleNavigation = setupArticleNavigation(main); }
   } else if (section === 'papers' && !slug) {
     active = 'papers'; title = 'Papers'; main.innerHTML = papers();

@@ -32,23 +32,6 @@
 .chess-result.correct strong { color: #b6ccb6; }
 .chess-reset { flex-shrink: 0; }
 
-/* Notebook stages describe maturity, not certainty. */
-.notebook-page { width: 100%; margin-inline: auto; }
-.notebook-page .feature-kicker { text-align: center; }
-.notebook-filters { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 18px 0 32px; }
-.blogs-empty .notebook-filters { justify-content: center; }
-.notebook-filters span { opacity: .6; margin-left: 4px; }
-.notebook-empty { margin: 0; color: #fff; }
-.notebook-entry { border-bottom: 1px solid #a59b9e35; padding-bottom: 24px; text-align: center; }
-.notebook-entry a { display: block; }
-.notebook-meta { display: flex; justify-content: center; gap: 16px; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-.notebook-meta span { color: #d0a29e; }
-.notebook-entry p { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
-.notebook-stage-note { border-left: 2px solid #a17370; padding-left: 16px; color: var(--muted); font-size: 13px; }
-.note-changes { margin-top: 40px; padding-top: 20px; border-top: 1px solid #a59b9e40; font-size: 13px; }
-.notebook-article .article-body a { text-decoration: underline; }
-.notebook-article pre { max-width: 100%; overflow: auto; background: #201c1ddd; padding: 18px; font-size: 13px; }
-
 /* Small definitions remain in context; no external preview requests. */
 .definition-trigger { padding: 0; border: 0; border-bottom: 1px dotted #c79c99; background: none; color: inherit; font: inherit; line-height: inherit; cursor: help; }
 .definition-trigger:hover, .definition-trigger[aria-expanded='true'] { color: #e7b9b4; }

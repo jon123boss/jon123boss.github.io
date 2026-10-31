@@ -16,20 +16,7 @@ nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .wordmark-name { display: block; }
 .page { min-width: 0; }
 .about-page .bio-greeting { margin: 0 0 14px; font: 600 1em/1.65 var(--font); color: inherit; }
-.notebook-title { font: 400 12px/1.85 var(--font); letter-spacing: .04em; margin-bottom: 10px; }
-.notebook-entry h2 { font-size: clamp(17px, 2.2vw, 21px); line-height: 1.6; max-width: 660px; margin-inline: auto; }
-.notebook-entry p { max-width: 620px; margin-inline: auto; }
-.notebook-meta { flex-wrap: wrap; }
-.notebook-article > h1 { max-width: 740px; }
-.notebook-article .article-body { line-height: 1.9; }
-.article-body h2[id] { scroll-margin-top: 28px; }
-.article-body h2[id]:focus { outline: none; }
-.article-body p, .paper-info, .architecture-specs dd, .leader-name { overflow-wrap: anywhere; }
-.article-contents { max-width: 740px; margin: 0 auto 38px; padding: 12px 0; border-top: 1px solid #a59b9e40; border-bottom: 1px solid #a59b9e40; }
-.article-contents summary { display: block; min-height: 28px; color: #c6bec0; font-size: 13px; line-height: 28px; }
-.article-contents ol { margin: 16px 0 8px; padding-left: 26px; font-size: 13px; line-height: 1.7; }
-.article-contents li { padding: 4px 0 4px 4px; }
-.article-contents a { text-decoration: underline; text-decoration-color: #a59b9e40; }
+.paper-info, .architecture-specs dd, .leader-name { overflow-wrap: anywhere; }
 .explanation-page { margin-inline: auto; }
 .reading-peek { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
 .background-controls { gap: 8px; }
@@ -55,10 +42,6 @@ nav a { display: inline-flex; align-items: center; min-height: 44px; }
   .site-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
   .site-header { padding-top: max(20px, env(safe-area-inset-top)); row-gap: 10px; }
   nav { gap: 22px; }
-  .notebook-article > h1 { font-size: clamp(23px, 5.8vw, 30px); letter-spacing: -.035em; }
-  .notebook-article .article-body { font-size: 15px; line-height: 1.85; }
-  .article-body h2 { font-size: 20px; }
-  .article-meta { font-size: 12px; line-height: 1.7; }
   .research-plot, .research-diagram { margin-inline: -6px; }
   .plot-tabs button, .plot-legend button { font-size: 11px; }
   .plot-meta, .article-body .plot-meta { font-size: 11px; }
@@ -69,11 +52,6 @@ nav a { display: inline-flex; align-items: center; min-height: 44px; }
   .paper-link, .explanation-button { min-height: 44px; display: inline-flex; align-items: center; }
   .paper-explanation { text-align: left; }
   .paper-explanation .explanation-button { margin-left: 0; }
-  .reading-article main { margin-top: 34px; }
-  .reading-article .back-link { margin-bottom: 24px; }
-  .article-contents { margin-bottom: 32px; }
-  .article-contents summary { min-height: 36px; line-height: 36px; }
-  .article-contents a { display: block; padding-block: 5px; }
 }
 @media (pointer: coarse) {
   .quiet-button, .plot-tabs button, .plot-legend button, .plot-range, .budget-preset button, .lab-step, .trace-concept, .peek-close { min-height: 44px; }
@@ -124,29 +102,6 @@ nav a { display: inline-flex; align-items: center; min-height: 44px; }
   .article-body pre { white-space: pre-wrap; overflow-wrap: anywhere; color: #161616; background: #f6f6f6; }
 }
 
-/* Outlined notebook entries with one clear destination per card. */
-.notebook-page .entry-list { display: grid; gap: 18px; max-width: 840px; margin-inline: auto; }
-.notebook-entry { margin: 0; padding: 0; border: 0; }
-.notebook-entry > a {
-  position: relative; padding: 28px 50px 30px; border: 1px solid #a59b9e55;
-  border-radius: 6px; background: #231f20a8; text-decoration: none;
-  transition: border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
-}
-.notebook-entry .notebook-meta { margin-bottom: 13px; }
-.notebook-entry h2 { margin-block: 0; font-weight: 400; }
-.notebook-open { position: absolute; top: 24px; right: 23px; font-size: 16px; line-height: 1; color: #a59b9e; transition: color 220ms ease, transform 220ms ease; }
-.notebook-entry > a:focus-visible { border-color: var(--accent); outline-offset: 5px; }
-@media (hover: hover) {
-  .notebook-entry > a:hover { border-color: #cb88839c; background-color: #2c2427de; box-shadow: 0 8px 30px #120f1018; }
-  .notebook-entry > a:hover .notebook-open { color: var(--accent); transform: translateX(3px); }
-}
-@media (max-width: 620px) {
-  .notebook-entry > a { padding: 23px 24px 26px; }
-  .notebook-entry .notebook-meta { padding-inline: 14px; font-size: 10px; gap: 12px; }
-  .notebook-entry h2 { font-size: 18px; line-height: 1.55; }
-  .notebook-open { top: 24px; right: 14px; font-size: 14px; }
-}
-
 /* A small, staggered entrance inspired by the reference's fade-up treatment. */
 main.page-arrival > .page > * {
   animation: content-arrival 420ms cubic-bezier(.22, 1, .36, 1) var(--arrival-delay, 0ms) backwards;
@@ -158,9 +113,6 @@ main.page-arrival > .article-rail { animation: content-opacity 420ms ease 100ms 
   /* Keep the appearance cue, with no movement or stagger. */
   main.page-arrival > .page > *, main.page-arrival > .article-rail { animation: content-opacity 180ms linear backwards !important; }
 }
-@media (forced-colors: active) { .notebook-entry > a { border-color: CanvasText; } }
 @media print {
-  .notebook-entry > a { background: #fff; border-color: #bbb; }
-  .notebook-open { display: none; }
   main.page-arrival > .page > *, main.page-arrival > .article-rail { animation: none !important; }
 }
