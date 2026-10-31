@@ -10,7 +10,7 @@ a:focus-visible,button:focus-visible{outline:1px solid var(--accent);outline-off
 .wordmark,nav a{transition:color .25s ease}
 .wordmark{display:inline-flex;align-items:baseline;gap:10px}
 .wordmark-logo{display:block;width:32px;height:32px;flex:none;align-self:center;object-fit:contain}
-nav a[aria-current='page']{color:var(--accent);text-decoration:underline;text-underline-offset:8px;text-decoration-color:rgba(var(--accent-rgb),.5)}
+nav a[aria-current='page']{color:var(--accent);text-decoration:underline;text-underline-offset:6px;text-decoration-color:rgba(var(--accent-rgb),.5)}
 .entry-link:hover h2,.back-link:hover,.paper-link:hover,summary:hover{color:var(--accent)}
 .page{text-shadow:0 1px 2px #231f20}
 .about-page{position:relative;isolation:isolate}

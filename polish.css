@@ -8,8 +8,6 @@ img, svg { max-width: 100%; }
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent, #cb8883); outline-offset: 4px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 .skip-link { z-index: 100; border-radius: 3px; }
-.site-shell { width: min(940px, calc(100% - 64px)); }
-.site-header { align-items: center; }
 .site-header nav { flex-shrink: 0; }
 nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .wordmark { min-height: 44px; align-items: center; line-height: 1.25; }
@@ -39,8 +37,6 @@ nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .chart-fallback th { font-weight: 500; }
 .chart-fallback caption { text-align: left; margin: 0 0 12px; color: var(--muted); }
 @media (max-width: 620px) {
-  .site-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
-  .site-header { padding-top: max(20px, env(safe-area-inset-top)); row-gap: 10px; }
   nav { gap: 22px; }
   .research-plot, .research-diagram { margin-inline: -6px; }
   .plot-tabs button, .plot-legend button { font-size: 11px; }

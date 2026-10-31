@@ -1,17 +1,9 @@
 /* Keller's reading metrics with the site's warm dark palette. */
 .view-blog {
-  --font: -apple-system, BlinkMacSystemFont, 'segoe ui', Roboto, Oxygen, Ubuntu, Cantarell, 'open sans', 'helvetica neue', sans-serif;
-  --gap: 24px;
-  padding-bottom: 0;
+  --font: var(--sans);
   font: 400 18px/1.6 var(--font);
 }
-.view-blog .ambient-canvas, .view-blog .background-controls { display: none; }
-.view-blog .site-shell { width: min(1024px, calc(100% - var(--gap) * 2)); margin-inline: auto; }
-.view-blog .site-header { padding: 0; min-height: 60px; gap: 0 24px; }
-.view-blog .wordmark { font-size: 24px; font-weight: 700; gap: 10px; }
-.view-blog .site-header nav { gap: 24px; }
-.view-blog .site-header nav a { font-size: 16px; font-weight: 400; }
-.view-blog .site-header nav a[aria-current='page'] { text-underline-offset: 6px; }
+.reading-article .ambient-canvas { display: none; }
 .view-blog main { width: min(100%, 720px); margin: calc(var(--gap) + 24px) auto 96px; }
 .view-blog .page { max-width: 720px; text-shadow: none; }
 
@@ -68,7 +60,6 @@
 .blog-post-footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #a59b9e30; }
 .blog-post-footer .back-link { margin: 0; font-size: 15px; }
 
-@media (max-width: 768px) { .view-blog { --gap: 14px; } }
 @media (pointer: coarse) { .notebook-filters .quiet-button { min-height: 44px; } }
 @media (prefers-contrast: more) {
   .notebook-entry > a { border-color: var(--muted); }
