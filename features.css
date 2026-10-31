@@ -2,7 +2,7 @@
 .quiet-button:hover, .quiet-button[aria-pressed='true'] { color: #f4eee8; border-color: #cb8883; }
 .feature-kicker { color: var(--muted); font-size: 12px; margin-bottom: 10px; letter-spacing: .04em; }
 .paper-explanation .explanation-button { margin: 3px; }
-.try-idea-button { color: #d7aaa6; }
+.try-idea-button { color: var(--text); }
 
 /* The opening quiz is a single move, with a standard board and visible coordinates. */
 .chess-page { width: 100%; max-width: 440px; margin: 0 auto; }
