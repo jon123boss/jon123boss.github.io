@@ -23,9 +23,9 @@ function links(html) {
 const pages=[
   ['about','About me',about(),'view-about'],
   ['about/chess','Chess',chessPage().replace('<div class="chess-board"','<noscript><p>The opening quiz needs JavaScript. You can still read the rest of the site.</p></noscript><div class="chess-board"'),'view-about'],
-  ['blogs','Blogs',notebookPage(site.blogs),''],
+  ['blogs','Blogs',notebookPage(site.blogs),'view-blog'],
   ['papers','Papers',papers(),''],
-  ...site.blogs.filter(p=>!p.draft).map(p=>[`blogs/${p.slug}`,p.title,notebookPost(p),'reading-article']),
+  ...site.blogs.filter(p=>!p.draft).map(p=>[`blogs/${p.slug}`,p.title,notebookPost(p),'view-blog reading-article']),
   ['papers/exoformer','ExoFormer explained',explanationPage(exoformer),'reading-explanation'],
   ['papers/lr-attnres','LR-AttnRes explained',explanationPage(attnres),'reading-explanation'],
 ];

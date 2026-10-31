@@ -5,14 +5,20 @@ export const notebookKinds = { idea: 'ideas', note: 'working notes', essay: 'ess
 export const visiblePosts = posts => posts.filter(post => !post.draft || post.listedDraft);
 export const postKind = post => Object.prototype.hasOwnProperty.call(notebookKinds, post.kind) ? post.kind : 'essay';
 const kindLabel = post => post.draft ? 'draft' : ({ idea: 'idea', note: 'working note', essay: 'essay' })[postKind(post)];
+const readableDate = date => /^\d{4}-\d{2}-\d{2}$/.test(date || '')
+  ? new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+  : escape(date || '');
+const readingMinutes = post => Math.max(1, Math.ceil((post.bodyHTML || (post.body || []).map(block => block.text || block.items?.join(' ') || '').join(' '))
+  .replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length / 200));
+const postDate = post => `<time datetime="${escape(post.date)}">${readableDate(post.date)}</time>`;
 
 export function notebookPage(posts, kind = 'all') {
   const published = visiblePosts(posts);
   const filtered = published.filter(post => kind === 'all' || postKind(post) === kind);
   return `<section class="page notebook-page${!published.length ? ' blogs-empty' : ''}" aria-label="Research notebook">
-    <h1 class="feature-kicker notebook-title">research notebook</h1>
+    <header class="notebook-heading"><h1 class="notebook-title">Blogs</h1><p>Notes and essays on language models, architecture, and training.</p></header>
     <div class="notebook-filters" role="group" aria-label="Filter writing by stage">${[['all', 'all'], ...Object.entries(notebookKinds)].map(([value, label]) => `<button type="button" class="quiet-button" data-notebook-filter="${value}" aria-pressed="${kind === value}">${label}${published.length ? ` <span>${published.filter(p => value === 'all' || postKind(p) === value).length}</span>` : ''}</button>`).join('')}</div>
-    ${filtered.length ? `<ul class="entry-list">${filtered.map(post => `<li class="entry notebook-entry"><a href="#blogs/${encodeURIComponent(post.slug)}"><div class="notebook-meta"><span>${kindLabel(post)}</span><time datetime="${escape(post.updated || post.date)}">${escape(post.updated || post.date)}</time></div><h2>${escape(post.title)}</h2><span class="notebook-open" aria-hidden="true">→</span></a></li>`).join('')}</ul>` : `<p class="notebook-empty" role="status">${!published.length ? 'No blogs yet.' : 'Nothing in this stage yet.'}</p>`}
+    ${filtered.length ? `<ul class="entry-list">${filtered.map(post => `<li class="entry notebook-entry"><a href="#blogs/${encodeURIComponent(post.slug)}"><h2>${escape(post.title)}</h2>${post.summary ? `<p class="notebook-summary">${escape(post.summary)}</p>` : ''}<div class="notebook-meta">${postDate(post)}<span aria-hidden="true">·</span><span>${readingMinutes(post)} min</span><span aria-hidden="true">·</span><span>${kindLabel(post)}</span></div></a></li>`).join('')}</ul>` : `<p class="notebook-empty" role="status">${!published.length ? 'No blogs yet.' : 'Nothing in this stage yet.'}</p>`}
   </section>`;
 }
 export function notebookPost(post) {
@@ -27,13 +33,15 @@ export function notebookPost(post) {
     return `<${tag}>${escape(block.text)}</${tag}>`;
   }).join('');
   const headings = [...(post.bodyHTML || '').matchAll(/<h2 id="([^"]+)">([^<]+)<\/h2>/g)];
-  const body = (post.bodyHTML || blocks).replace(/(<h2\b[^>]*>)([\s\S]*?)(<\/h2>)/g, '$1<span class="section-highlight">$2</span>$3');
+  const body = (post.bodyHTML || blocks).replace(/(<h2 id="([^"]+)">)([\s\S]*?)(<\/h2>)/g,
+    (_, open, id, title, close) => `${open}${title}<a class="heading-anchor" href="#blogs/${encodeURIComponent(post.slug)}/${escape(id)}" aria-label="Link to this section">#</a>${close}`);
   const contents = headings.length > 3 ? `<details class="article-contents"><summary>In this article <span class="article-progress-label" data-reading-progress hidden aria-label="Reading progress"></span></summary><ol>${headings.map(([,id,title]) => `<li><a href="#blogs/${encodeURIComponent(post.slug)}/${id}">${title}</a></li>`).join('')}</ol></details>` : '';
-  return `${articleNavigation(headings, post.slug)}<article class="page notebook-article"><a class="back-link" href="#blogs">← Blogs</a>
-    <p class="feature-kicker">${kindLabel(post)}</p><h1>${escape(post.title)}</h1>
-    <p class="article-meta">${post.draft ? `draft · updated ${escape(post.updated || post.date)}` : `published ${escape(post.date)}${post.updated ? ` · updated ${escape(post.updated)}` : ''}`}</p>
+  return `${articleNavigation(headings, post.slug)}<article class="page notebook-article">
+    <header class="blog-post-header"><h1>${escape(post.title)}</h1>
+    <p class="article-meta">${post.draft ? `Draft · updated ${readableDate(post.updated || post.date)}` : `${postDate(post)}${post.updated ? ` · updated ${readableDate(post.updated)}` : ''}`} <span aria-hidden="true">·</span> ${readingMinutes(post)} min</p></header>
     ${post.kind === 'idea' || post.kind === 'note' ? '<p class="notebook-stage-note">a thought in progress; this may change.</p>' : ''}
     ${contents}<div class="article-body">${body}</div>
     ${post.changes?.length ? `<details class="note-changes"><summary>how this note changed</summary><ul>${post.changes.map(change => `<li><time>${escape(change.date)}</time> — ${escape(change.text)}</li>`).join('')}</ul></details>` : ''}
+    <footer class="blog-post-footer"><a class="back-link" href="#blogs">← All posts</a></footer>
   </article>`;
 }

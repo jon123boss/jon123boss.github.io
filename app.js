@@ -2,7 +2,7 @@ import { setupArticleNavigation } from './article-navigation.js?v=blog-cards-202
 import { about, papers } from './page-views.js?v=platform-polish-20261005';
 import { site } from './content.js?platform-polish-20261005';
 import { chessPage, setupChess } from './chess-opening.js?v=refined-24';
-import { notebookPage, notebookPost, visiblePosts } from './notebook.js?v=blog-layout-20261009';
+import { notebookPage, notebookPost, visiblePosts } from './notebook.js?v=blog-remodel-20261031';
 import { setupResearchPlots } from './research-plots.js?v=blog-layout-20261009';
 import { clearReadingTools } from './reading-tools.js?v=features-20';
 import { setupPaperPreviews } from './paper-previews.js?v=blender-27';
@@ -120,6 +120,7 @@ async function render({ focus = false } = {}) {
   const isExplanation = section === 'papers' && Object.prototype.hasOwnProperty.call(explanationLoaders, slug);
   document.body.classList.toggle('reading-explanation', isExplanation);
   document.body.classList.toggle('reading-article', !!post);
+  document.body.classList.toggle('view-blog', active === 'blogs');
   document.body.classList.toggle('view-about', active === 'about');
   document.body.classList.toggle('view-empty-blogs', section === 'blogs' && !slug && !visiblePosts(site.blogs).length);
   document.dispatchEvent(new CustomEvent('site:reading-change'));

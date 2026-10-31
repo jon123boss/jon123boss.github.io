@@ -21,10 +21,11 @@
   <link rel="stylesheet" href="research-plots.css?v=blog-layout-20261009">
   <link rel="stylesheet" href="polish.css?v=blog-cards-20261005">
   <link rel="stylesheet" href="article-navigation.css?v=blog-cards-panel-20261005">
-  <script type="module" src="app.js?v=blog-layout-20261009"></script>
+  <link rel="stylesheet" href="blog-layout.css?v=blog-remodel-20261031">
+  <script type="module" src="app.js?v=blog-remodel-20261031"></script>
   <script type="module" src="theme-controller.js?v=blackwall-rail-20261005c"></script>
 </head>
-<body class="" data-route="blogs">
+<body class="view-blog" data-route="blogs">
   <canvas class="ambient-canvas" id="ambient" aria-hidden="true"></canvas>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="site-shell" id="site-content">
@@ -37,9 +38,9 @@
       </nav>
     </header>
     <main id="main" tabindex="-1"><section class="page notebook-page" aria-label="Research notebook">
-    <h1 class="feature-kicker notebook-title">research notebook</h1>
+    <header class="notebook-heading"><h1 class="notebook-title">Blogs</h1><p>Notes and essays on language models, architecture, and training.</p></header>
     <div class="notebook-filters" role="group" aria-label="Filter writing by stage"><button type="button" class="quiet-button" data-notebook-filter="all" aria-pressed="true">all <span>1</span></button><button type="button" class="quiet-button" data-notebook-filter="idea" aria-pressed="false">ideas <span>0</span></button><button type="button" class="quiet-button" data-notebook-filter="note" aria-pressed="false">working notes <span>0</span></button><button type="button" class="quiet-button" data-notebook-filter="essay" aria-pressed="false">essays <span>1</span></button></div>
-    <ul class="entry-list"><li class="entry notebook-entry"><a href="purrence.html" data-route="blogs/purrence"><div class="notebook-meta"><span>essay</span><time datetime="2026-10-05">2026-10-05</time></div><h2>Severely Parameter Constrained Language Model Training: 3 Million Parameters</h2><span class="notebook-open" aria-hidden="true">→</span></a></li></ul>
+    <ul class="entry-list"><li class="entry notebook-entry"><a href="purrence.html" data-route="blogs/purrence"><h2>Severely Parameter Constrained Language Model Training: 3 Million Parameters</h2><p class="notebook-summary">Experiments with a language model of three million parameters, ending with a local intelligence index of 8.4873.</p><div class="notebook-meta"><time datetime="2026-10-05">October 5, 2026</time><span aria-hidden="true">·</span><span>16 min</span><span aria-hidden="true">·</span><span>essay</span></div></a></li></ul>
   </section></main>
   </div>
   <div hidden class="background-controls" role="group" aria-label="Background controls">
