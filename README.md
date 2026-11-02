@@ -27,6 +27,12 @@ npm test
 
 The site has no package dependencies. Its generated HTML remains readable without JavaScript.
 
+## Search metadata
+
+`site-seo.js` defines titles, descriptions, canonical URLs, and structured data. The build regenerates `sitemap.xml` from the published pages; drafts are excluded. `robots.txt` advertises the sitemap. The favicon uses the existing J on an opaque dark background so it remains visible in search results.
+
+After publishing, submit `https://jonathansu.me/sitemap.xml` in Google Search Console and inspect the homepage and new article URLs to request indexing. Search Console is the source for indexing status; publishing metadata does not guarantee indexing or rankings.
+
 ## Hosting
 
 GitHub Pages publishes the root of the default branch. The `.nojekyll` file preserves the static site as written. Pushing a website update to the publishing branch triggers deployment.
